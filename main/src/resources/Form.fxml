@@ -8,7 +8,6 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
 <GridPane hgap="5.0" vgap="5.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
@@ -70,7 +69,7 @@
       </ToggleButton>
       <ToggleButton mnemonicParsing="false" prefHeight="25.0" prefWidth="39.0" text="\%" toggleGroup="$tgBinaryOperator" GridPane.columnIndex="1" GridPane.rowIndex="1" />
       <ToggleButton mnemonicParsing="false" prefHeight="25.0" prefWidth="39.0" text="←" toggleGroup="$tgClear" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-      <TextArea fx:id="taCalc" prefHeight="79.0" prefWidth="171.0" GridPane.columnSpan="4" />
+      <TextArea fx:id="taCalc" nodeOrientation="RIGHT_TO_LEFT" prefHeight="79.0" prefWidth="171.0" GridPane.columnSpan="4" GridPane.halignment="RIGHT" GridPane.valignment="CENTER" />
    </children>
    <padding>
       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
