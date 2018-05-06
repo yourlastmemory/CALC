@@ -1,13 +1,12 @@
 import java.net.URL;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
+
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import org.jetbrains.annotations.NotNull;
-import rx.Observable;
-import rx.Subscriber;
 
 public class Controller {
 
@@ -29,49 +28,98 @@ public class Controller {
     private ToggleGroup tgClear;
 
     @FXML
-    private TextArea taCalc;
-    private StringBuilder firstOperand=new StringBuilder();
-    private StringBuilder secondOperand=new StringBuilder();
-    private StringBuilder operator=new StringBuilder();
+    private TextField tfFirstOperand;
+
+    @FXML
+    private TextField tfSecondOperand;
+
+    @FXML
+    private Label lbAction;
+
+    @FXML
+    private Label lbResult;
+    private String lastFocused ="first";
+
+    @FXML
+    void btnChangeSign(ActionEvent event) {
+
+    }
+
+    @FXML
+    void btnComma(ActionEvent event) {
+
+    }
 
     private void configureControls(){
-        taCalc.setText(" \n \n ");
-        tgSymbol.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+        tgClear.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            String symbol;
             if (newValue!=null)
-                secondOperand.append(((ToggleButton)newValue).getText());
+                symbol=((ToggleButton)newValue).getText();
             else
-                secondOperand.append(((ToggleButton)oldValue).getText());
-            changeText();
+                symbol=((ToggleButton)oldValue).getText();
+            if (!Objects.equals(symbol, "C")){
+                tfSecondOperand.clear();
+                tfFirstOperand.clear();
+                lbResult.setText("");
+                lbAction.setText("");
+            }
+            if (Objects.equals(symbol, "C")&& Objects.equals(lastFocused, "first"))
+                tfFirstOperand.setText(Optional.ofNullable(tfFirstOperand.getText())
+                        .filter(str -> str.length() != 0)
+                        .map(str -> str.substring(0, str.length() - 1))
+                        .orElse(tfFirstOperand.getText()));
+            if (Objects.equals(symbol, "C")&& Objects.equals(lastFocused, "second"))
+                tfFirstOperand.setText(Optional.ofNullable(tfSecondOperand.getText())
+                        .filter(str -> str.length() != 0)
+                        .map(str -> str.substring(0, str.length() - 1))
+                        .orElse(tfSecondOperand.getText()));
+        });
+        tfSecondOperand.setOnMouseClicked(e->{
+            lastFocused ="second";
+        });
+        tfFirstOperand.setOnMouseClicked(e->{
+            lastFocused ="first";
+        });
+        tgSymbol.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            String symbol;
+            if (newValue!=null)
+                symbol=((ToggleButton)newValue).getText();
+            else
+                symbol=((ToggleButton)oldValue).getText();
+            if (lastFocused.equals("first") &&tfFirstOperand.getText().length()<10)
+                tfFirstOperand.setText(tfFirstOperand.getText()+symbol);
+            else if (lastFocused.equals("second") &&tfSecondOperand.getText().length()<10)
+                tfSecondOperand.setText(tfSecondOperand.getText()+symbol);
+
         });
         tgBinaryOperator.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            Toggle value;
-            if (newValue!=null)value=newValue;
-            else value=oldValue;
-            if (operator.toString().equals(" ")||operator.toString().length()==0) {
-                operator=new StringBuilder(((ToggleButton)value).getText());
-                firstOperand=new StringBuilder(secondOperand.toString());
-                secondOperand=new StringBuilder("");
-                changeText();
+            String action;
+            if (newValue!=null)
+                action=((ToggleButton)newValue).getText();
+            else
+                action=((ToggleButton)oldValue).getText();
+            if (tfFirstOperand.getText().length()==0
+                    ||tfSecondOperand.getText().length()==0
+                    ||lbAction.getText().length()==0) {
+                lbAction.setText(action);
             }else {
                 System.out.println("else");
                 applyPreviousFunction();
-                operator=new StringBuilder("");
-                if (value!=null)
-                operator.append(((ToggleButton)value).getText());
-                changeText();
+                lbAction.setText(action);
             }
+            lastFocused="second";
         });
         tgUnaryOperator.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            if (operator.toString().equals(" ")||operator.toString().length()==0) {
-                operator= new StringBuilder((((ToggleButton)newValue).getText()));
-                firstOperand=new StringBuilder(secondOperand.toString());;
-                secondOperand=new StringBuilder("");;
+            String action;
+            if (newValue!=null)
+                action=((ToggleButton)newValue).getText();
+            else
+                action=((ToggleButton)oldValue).getText();
+            if (lbAction.getText().length()!=0) {
                 applyPreviousFunction();
-                changeText();
+                lbAction.setText(action);
             }else {
-                applyPreviousFunction();
-                operator=new StringBuilder(((ToggleButton)newValue).getText());
-                changeText();
+                lbAction.setText(action);
             }
             tgUnaryOperator.getSelectedToggle().setSelected(false);
         });
@@ -80,13 +128,14 @@ public class Controller {
     private void changeText() {
         String[] array=new String[]{" "," "," "};
         StringBuilder textToSet = new StringBuilder();
-        array[0]=selectNumberType(firstOperand);
-        array[1]=operator.toString();
-        array[2]=selectNumberType(secondOperand);
+//        array[0]=selectNumberType(tfFirstOperand);
+//        array[1]=operator.toString();
+//        array[2]=selectNumberType(tfSecondOperand);
         for (String anArray : array) {
             textToSet.append(anArray).append("\n");
         }
-        taCalc.setText(textToSet.toString());
+//        taCalc.setText(textToSet.toString());
+
     }
 
     private String selectNumberType(StringBuilder stringNumber) {
@@ -106,9 +155,9 @@ public class Controller {
     }
 
     private void applyPreviousFunction() {
-        System.out.println("|"+operator+"|");
+//        System.out.println("|"+operator+"|");
         Double result=0.;
-        switch (operator.toString().replaceAll(" ","")){
+        switch (lbAction.getText()){
             case "+":{
                 result=calcSum();
                 break;
@@ -152,32 +201,29 @@ public class Controller {
             }
         }
         System.out.println("res="+result);
-        firstOperand=new StringBuilder(result.toString());
-        secondOperand=new StringBuilder(" ");
-        operator=new StringBuilder(" ");
-        changeText();
+        lbResult.setText(String.valueOf(result));
 
     }
 
     @NotNull
     private Double calcPower() {
-        return Math.pow(convertToNumber(firstOperand),convertToNumber(secondOperand));
+        return Math.pow(convertToNumber(tfFirstOperand),convertToNumber(tfSecondOperand));
     }
 
     @NotNull
     private Double calcRoot() {
-        return Math.sqrt(convertToNumber(firstOperand));
+        return Math.sqrt(convertToNumber(tfFirstOperand));
     }
 
     @NotNull
     private Double calcPercent() {
-        return convertToNumber(firstOperand)/100*convertToNumber(secondOperand);
+        return convertToNumber(tfFirstOperand)/100*convertToNumber(tfSecondOperand);
     }
 
     @NotNull
     private Double calcFactorial() {
         try {
-            Integer integer=Integer.getInteger(firstOperand.toString());
+            Integer integer=Integer.getInteger(tfFirstOperand.toString());
             Integer res=1;
             for (int i = 1; i < 1+integer; i++) {
                 res=res*i;
@@ -191,33 +237,33 @@ public class Controller {
 
     @NotNull
     private Double calcReverse() {
-        return 1/convertToNumber(firstOperand);
+        return 1/convertToNumber(tfFirstOperand);
     }
 
     @NotNull
     private Double calcDiv() {
-        return (convertToNumber(firstOperand)/convertToNumber(secondOperand));
+        return (convertToNumber(tfFirstOperand)/convertToNumber(tfSecondOperand));
     }
 
     @NotNull
     private Double calcMul() {
-        return (convertToNumber(firstOperand)*convertToNumber(secondOperand));
+        return (convertToNumber(tfFirstOperand)*convertToNumber(tfSecondOperand));
     }
 
     @NotNull
     private Double calcSub() {
-        return (convertToNumber(firstOperand)-convertToNumber(secondOperand));
+        return (convertToNumber(tfFirstOperand)-convertToNumber(tfSecondOperand));
     }
 
     @NotNull
     private Double calcSum() {
-        return (convertToNumber(firstOperand)+convertToNumber(secondOperand));
+        return (convertToNumber(tfFirstOperand)+convertToNumber(tfSecondOperand));
     }
 
     @NotNull
-    private Double convertToNumber(StringBuilder operand) {
+    private Double convertToNumber(TextField operand) {
         try {
-            return Double.valueOf(operand.toString());
+            return Double.valueOf(operand.getText());
         } catch (NumberFormatException e) {
             return 0.;
         }
@@ -229,7 +275,10 @@ public class Controller {
         assert tgUnaryOperator != null : "fx:id=\"tgUnaryOperator\" was not injected: check your FXML file 'Form.fxml'.";
         assert tgBinaryOperator != null : "fx:id=\"tgBinaryOperator\" was not injected: check your FXML file 'Form.fxml'.";
         assert tgClear != null : "fx:id=\"tgClear\" was not injected: check your FXML file 'Form.fxml'.";
-        assert taCalc != null : "fx:id=\"taCalc\" was not injected: check your FXML file 'Form.fxml'.";
+        assert tfFirstOperand != null : "fx:id=\"tfFirstOperand\" was not injected: check your FXML file 'Form.fxml'.";
+        assert tfSecondOperand != null : "fx:id=\"tfSecondOperand\" was not injected: check your FXML file 'Form.fxml'.";
+        assert lbAction != null : "fx:id=\"lbAction\" was not injected: check your FXML file 'Form.fxml'.";
+        assert lbResult != null : "fx:id=\"lbResult\" was not injected: check your FXML file 'Form.fxml'.";
         configureControls();
     }
 

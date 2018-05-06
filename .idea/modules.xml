@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ModuleRenamingHistory">
+    <module old-name="CALC_main" new-name="CALC.CALC_main" />
+    <module old-name="CALC_test" new-name="CALC.CALC_test" />
+  </component>
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CALC.CALC_main.iml" filepath="$PROJECT_DIR$/.idea/modules/CALC.CALC_main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CALC.CALC_test.iml" filepath="$PROJECT_DIR$/.idea/modules/CALC.CALC_test.iml" />
+    </modules>
+  </component>
+</project>
